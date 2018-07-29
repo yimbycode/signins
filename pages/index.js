@@ -9,18 +9,44 @@ import {
 } from "evergreen-ui";
 import "whatwg-fetch";
 
+const specialLink = id => `${window.location.href}signin?id=${id}`;
+
+const SpecialLinkInfo = ({ id }) => {
+  if (!id || id === "") return null;
+
+  const link = specialLink(id);
+
+  return (
+    <Pane>
+      <Heading is="h3" marginBottom={majorScale(2)}>
+        Special Link
+      </Heading>
+      <Paragraph marginBottom={majorScale(2)}>
+        Click below to go to a sign in page or copy paste this link to use on
+        another computer.
+      </Paragraph>
+      <Pane background="tint1" padding={majorScale(2)}>
+        <a href={link}>{link}</a>
+      </Pane>
+    </Pane>
+  );
+};
+
 class CampaignPicker extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { name: "" };
+    this.state = { name: "", isLoading: false };
 
     this.handleName = this.handleName.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleSubmit(event) {
+  async handleSubmit(event) {
     event.preventDefault();
-    fetch("/api/campaign", {
+
+    this.setState({ isLoading: true, id: "" });
+
+    const resp = await fetch("/api/campaign", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -29,6 +55,15 @@ class CampaignPicker extends React.Component {
         name: this.state.name
       })
     });
+
+    const json = await resp.json();
+
+    // Oh shit error
+    if (json.message !== "success" || !json.id) {
+      console.error(json);
+    }
+
+    this.setState({ id: json.id, isLoading: false });
   }
 
   handleName(event) {
@@ -85,7 +120,13 @@ class CampaignPicker extends React.Component {
               />
             </Pane>
 
-            <Button>Create</Button>
+            <Button isLoading={this.state.isLoading}>
+              {this.state.isLoading ? "Loading" : "Create"}
+            </Button>
+
+            <Pane marginTop={majorScale(4)}>
+              <SpecialLinkInfo id={this.state.id} />
+            </Pane>
           </Pane>
         </Pane>
       </form>

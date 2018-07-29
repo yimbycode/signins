@@ -145,8 +145,11 @@ async function handleFindOrCreateCampaign(req, res) {
   try {
     const campaign = await findOrCreateCampaign(conn, name);
 
+    // wtf salesforce
+    let id = campaign.id || campaign[0].Id;
+
     return res.json({
-      campaign,
+      id,
       message: "success"
     });
   } catch (err) {

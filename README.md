@@ -1,4 +1,4 @@
-# YIMBY Signin generator
+# 👋 YIMBY Signin generator
 
 This is the pro-housing, YIMBY signin generator for events.
 

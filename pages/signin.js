@@ -1,3 +1,6 @@
+/**
+ * @overview An form that collects signins or redirects people to sign up
+ */
 import {
   Pane,
   Heading,
@@ -9,7 +12,7 @@ import {
 import "whatwg-fetch";
 import { Paragraph } from "../node_modules/evergreen-ui/commonjs/typography";
 
-const FormField = ({ label, placeholder, value, onChange }) => (
+const FormField = ({ type = "text", label, placeholder, value, onChange }) => (
   <Pane marginBottom={majorScale(2)}>
     <Label htmlFor={32} size={400} display="block" marginBottom={majorScale(1)}>
       {label}
@@ -20,17 +23,56 @@ const FormField = ({ label, placeholder, value, onChange }) => (
       placeholder={placeholder}
       value={value}
       onChange={onChange}
+      type={type}
     />
   </Pane>
 );
 
+/**
+ * Returns a ready to go handler that sets the state variable
+ * with the text input target value
+ */
+function buildHandler(self, type) {
+  return event => self.setState({ [type]: event.target.value });
+}
+
+async function postJSON(path, body) {
+  return fetch("/api/email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(body)
+  });
+}
+
 class SignIn extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { email: "", isFullSignupForm: true };
+    this.state = {
+      email: "",
+      lastName: "",
+      firstName: "",
+      address: "",
+      city: "",
+      state: "",
+      zipcode: "",
+      occupation: "",
+      employer: "",
+      isFullSignupForm: false
+    };
 
-    this.handleEmail = this.handleEmail.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleEmailTrack = this.handleEmailTrack.bind(this);
+
+    this.handleEmail = buildHandler(this, "email");
+    this.handleLastName = buildHandler(this, "lastName");
+    this.handleFirstName = buildHandler(this, "firstName");
+    this.handleAddress = buildHandler(this, "address");
+    this.handleCity = buildHandler(this, "city");
+    this.handleState = buildHandler(this, "state");
+    this.handleZipcode = buildHandler(this, "zipcode");
+    this.handleOccupation = buildHandler(this, "occupation");
+    this.handleEmployer = buildHandler(this, "employer");
   }
 
   componentDidMount() {
@@ -38,38 +80,32 @@ class SignIn extends React.Component {
     this.campaignId = url.searchParams.get("id");
   }
 
-  handleSubmit(event) {
+  handleEmailTrack(event) {
     event.preventDefault();
-    console.log(this.campaignId);
-    fetch("/api/email", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email: this.state.email,
-        campaignId: this.campaignId
-      })
+    postJSON("/api/email", {
+      email: this.state.email,
+      campaignId: this.campaignId
     });
   }
 
-  handleFirstName(event) {}
-  handleLastName(event) {}
-  handleAddress(event) {}
-  handleCity(event) {}
-  handleState(event) {}
-  handleState(event) {}
-  handleZipcode(event) {}
-  handleOccupation(event) {}
-  handleEmployer(event) {}
+  handleSignup(event) {
+    event.preventDefault();
 
-  handleEmail(event) {
-    this.setState({ email: event.target.value });
+    postJSON("/api/email", {
+      campaignId: this.campaignId,
+      ...this.state // Just send it all #yolo
+    });
   }
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form
+        onSubmit={
+          this.state.isFullSignupForm
+            ? this.handleSignup
+            : this.handleEmailTrack
+        }
+      >
         <Pane
           padding={"100px"}
           display="flex"
@@ -97,6 +133,7 @@ class SignIn extends React.Component {
                 placeholder={"ex: yimbystar@gmail.com"}
                 value={this.state.email}
                 onChange={this.handleEmail}
+                type="email"
               />
 
               {this.state.isFullSignupForm && (
@@ -143,10 +180,11 @@ class SignIn extends React.Component {
 
                   {/* Zip Code */}
                   <FormField
-                    label={"Your State"}
+                    label={"Your Zipcode"}
                     placeholder={"ex: 94102"}
                     value={this.state.zipcode}
                     onChange={this.handleZipcode}
+                    type="number"
                   />
 
                   {/* Occupation */}

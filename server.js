@@ -1,6 +1,7 @@
 const jsforce = require("jsforce");
 const express = require("express");
 const next = require("next");
+const log = console.log;
 
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== "production";
@@ -45,10 +46,16 @@ function existingContact(conn, email) {
 }
 
 function findCampaign(conn, name) {
+  const params = {
+    Name: name
+  };
+
+  console.log("finding Campaign with params", params);
+
   return new Promise((resolve, reject) => {
     conn
       .sobject("Campaign")
-      .find({ CampaignName: name }) // TODO: add event type
+      .find(params)
       .limit(1)
       .execute((err, records) => {
         if (err) return reject(err);
@@ -58,17 +65,23 @@ function findCampaign(conn, name) {
   });
 }
 
-function createCampaign(conn, name) {
+async function createCampaign(conn, name) {
   // TODO add event type
-  return conn.sobject("Campaign").create({
+  const params = {
     Name: name
-  });
+  };
+
+  log("creating campaign with params", params);
+
+  // Create new campaign
+  return await conn.sobject("Campaign").create(params);
 }
 
 async function findOrCreateCampaign(conn, name) {
   try {
     const campaign = await findCampaign(conn, name);
-    if (campaign) {
+
+    if (campaign && campaign.length !== 0 && campaign[0].Id) {
       return campaign;
     }
 
@@ -131,7 +144,11 @@ async function handleFindOrCreateCampaign(req, res) {
 
   try {
     const campaign = await findOrCreateCampaign(conn, name);
-    campaign.id;
+
+    return res.json({
+      campaign,
+      message: "success"
+    });
   } catch (err) {
     res.json({
       err,
@@ -155,7 +172,7 @@ conn.login(user, pass, (err, res) => {
     server.post("/api/email", handleEmailCheck);
 
     // Add a whole new contact to the address
-    server.post("/api/newContact", handleNewContact);
+    server.post("/api/contact", handleNewContact);
 
     // returns a campaign id; either a brand new one or a previously existing one
     server.post("/api/campaign", handleFindOrCreateCampaign);

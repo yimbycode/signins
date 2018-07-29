@@ -20,7 +20,7 @@ class CampaignPicker extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    fetch("/api/email", {
+    fetch("/api/campaign", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -32,7 +32,7 @@ class CampaignPicker extends React.Component {
   }
 
   handleName(event) {
-    this.setState({ email: event.target.value });
+    this.setState({ name: event.target.value });
   }
 
   render() {
@@ -46,7 +46,7 @@ class CampaignPicker extends React.Component {
         >
           <Pane>
             <Heading size={900} marginBottom={majorScale(2)}>
-              YIMBY RSVP generator
+              Signin Page generator
             </Heading>
 
             <Paragraph marginBottom={majorScale(2)} maxWidth={600}>
@@ -80,8 +80,8 @@ class CampaignPicker extends React.Component {
                 name={32}
                 id={32}
                 placeholder="ex: Yimby Meetup 2020-10-3"
-                value={this.state.email}
-                onChange={this.handleEmail}
+                value={this.state.name}
+                onChange={this.handleName}
               />
             </Pane>
 

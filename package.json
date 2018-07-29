@@ -8,6 +8,7 @@
     "evergreen-ui": "^4.0.0-23",
     "express": "^4.16.3",
     "fs": "^0.0.1-security",
+    "global-request-logger": "^0.1.1",
     "got": "^8.3.2",
     "jsforce": "^1.9.0",
     "next": "^6.1.1",

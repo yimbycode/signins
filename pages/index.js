@@ -19,11 +19,11 @@ const SpecialLinkInfo = ({ id }) => {
   return (
     <Pane>
       <Heading is="h3" marginBottom={majorScale(2)}>
-        Special Link
+        ✨ Magic Link
       </Heading>
-      <Paragraph marginBottom={majorScale(2)}>
-        Click below to go to a sign in page or copy paste this link to use on
-        another computer.
+      <Paragraph marginBottom={majorScale(2)} maxWidth={600}>
+        Your signin page is now active at the link below! Click it now to go to
+        a signin or copy/paste it to use on several computers at once!
       </Paragraph>
       <Pane background="tint1" padding={majorScale(2)}>
         <a href={link}>{link}</a>
@@ -85,10 +85,7 @@ class CampaignPicker extends React.Component {
             </Heading>
 
             <Paragraph marginBottom={majorScale(2)} maxWidth={600}>
-              This tool helps you create a signin page for your events. When you
-              press "Create", you'll be redirected to a signin page.{" "}
-              <b>The URL is special!</b> You can copy/paste the link and reuse
-              it on other computers without creating a new campaign.
+              This tool helps you create a signin page for your events! 🙌
             </Paragraph>
 
             <Paragraph maxWidth={600} marginBottom={majorScale(4)}>

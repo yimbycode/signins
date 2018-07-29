@@ -17,15 +17,22 @@ class SignIn extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  componentDidMount() {
+    const url = new URL(window.location.href);
+    this.campaignId = url.searchParams.get("id");
+  }
+
   handleSubmit(event) {
     event.preventDefault();
+    console.log(this.campaignId);
     fetch("/api/email", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        email: this.state.email
+        email: this.state.email,
+        campaignId: this.campaignId
       })
     });
   }

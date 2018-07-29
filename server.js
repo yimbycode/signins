@@ -33,12 +33,19 @@ function createContact(conn, email, first, last) {
 }
 
 function existingContact(conn, email) {
+  const params = {
+    Email: email
+  };
+
+  log("Looking for contact", params);
+
   return new Promise((resolve, reject) => {
     conn
-      .find({ Email: Email })
+      .sobject("Contact")
+      .find(params)
       .limit(1)
       .execute((err, records) => {
-        if (err) return reject(err);
+        if (err) return reject(err, ercords);
 
         resolve(records);
       });
@@ -91,24 +98,41 @@ async function findOrCreateCampaign(conn, name) {
   }
 }
 
+async function addCampaignMember(conn, campaignId, contactId) {
+  const props = {
+    ContactId: contactId,
+    CampaignId: campaignId
+  };
+  log("Adding campaign member with ", props);
+  return conn.sobject("campaignMember").create(props);
+}
+
 async function handleEmailCheck(req, res) {
-  const { email } = req.body;
+  const { email, campaignId } = req.body;
+
+  log("Handling Email Check", req.body);
 
   try {
     // First check if this email exists already
-    const prevContact = await existingContact(conn);
+    const prevContact = await existingContact(conn, email);
     if (!prevContact) {
       return res.json({
         email,
-        message: "contact-doesnt-exist"
+        message: "contact-does-not-exist"
       });
     }
 
-    // If it does, then add it to the campaign
+    log("Found existing contact", prevContact);
 
-    //TODO add to campaign
-    const contactId = prevContact.id;
+    // wtf salesforce dont be mean
+    // you're mean salesforce dont be that way
+    const contactId = prevContact.id || prevContact[0].Id;
 
+    // if we have an id, then add it to the campaign
+    const resp = await addCampaignMember(conn, campaignId, contactId);
+
+    // Success!
+    log("Added person to campaign", prevContact, resp);
     res.json({
       prevContact,
       message: "success"

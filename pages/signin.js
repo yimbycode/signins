@@ -38,7 +38,7 @@ function buildHandler(self, type) {
 }
 
 async function postJSON(path, body) {
-  return fetch("/api/email", {
+  return fetch(path, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -116,7 +116,6 @@ class SignIn extends React.Component {
 
     // TODO catch new people here
     if (response.message === "contact-does-not-exist") {
-      console.log("here")
       toaster.notify("Hey we haven't seen you before!");
       this.setState({ isLoading: false, isFullSignupForm: true });
       return;
@@ -125,19 +124,26 @@ class SignIn extends React.Component {
     this.setState({ isLoading: false });
   }
 
-  handleSignup(event) {
+  async handleSignup(event) {
     event.preventDefault();
 
     this.setState({
       isLoading: true
     })
 
-    const response = postJSON("/api/email", {
+    const response = await postJSON("/api/contact", {
       campaignId: this.campaignId,
       ...this.state // Just send it all #yolo
     });
 
-    console.log(response);
+    // Grab "Bad" states/errors/warnings
+    if (!response || response.err) {
+      this.handleError(response.err || {});
+      this.setState({ isLoading: false, isFullSignupForm: false });
+      return;
+    }    
+
+    toaster.notify("You're signed up and signed in.");
 
     this.setState({
       isFullSignupForm: false,

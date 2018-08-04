@@ -25,11 +25,14 @@ if (!pass) {
 }
 
 function createContact(conn, email, first, last) {
-  return conn.sobject("Contact").create({
+  const params = {
     Email: email,
     FirstName: first,
     LastName: last
-  });
+  };
+
+  log("Creating new contact with", params)
+  return conn.sobject("Contact").create(params);
 }
 
 function existingContact(conn, email) {
@@ -147,10 +150,11 @@ async function handleEmailCheck(req, res) {
 }
 
 async function handleNewContact(req, res) {
-  const { email, firstName, lastName } = req.body;
+  const { email, firstName, lastName, campaignId } = req.body;
 
   try {
     const contact = await createContact(conn, email, firstName, lastName);
+    await addCampaignMember(conn, campaignId, contact.id);
 
     res.json({
       contact: contact,

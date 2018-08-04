@@ -7,7 +7,8 @@ import {
   TextInput,
   majorScale,
   Label,
-  Button
+  Button,
+  toaster
 } from "evergreen-ui";
 import "whatwg-fetch";
 import { Paragraph } from "../node_modules/evergreen-ui/commonjs/typography";
@@ -43,7 +44,7 @@ async function postJSON(path, body) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(body)
-  });
+  }).then(resp => resp.json());
 }
 
 class SignIn extends React.Component {
@@ -59,7 +60,8 @@ class SignIn extends React.Component {
       zipcode: "",
       occupation: "",
       employer: "",
-      isFullSignupForm: false
+      isFullSignupForm: false,
+      isLoading: false
     };
 
     this.handleEmailTrack = this.handleEmailTrack.bind(this);
@@ -80,12 +82,37 @@ class SignIn extends React.Component {
     this.campaignId = url.searchParams.get("id");
   }
 
-  handleEmailTrack(event) {
+  handleError(err) {
+    if (err.errorCode === "DUPLICATE_VALUE") {
+      toaster.warning("You've already signed in! Go have fun!")
+      console.warn(err);
+      return;
+    } 
+    
+    toaster.danger("😭 Something went wrong! Check the developer tools for more info.")
+    console.error(err)
+  }
+
+  async handleEmailTrack(event) {
     event.preventDefault();
-    postJSON("/api/email", {
+
+    this.setState({isLoading: true});
+
+    const response = await postJSON("/api/email", {
       email: this.state.email,
       campaignId: this.campaignId
     });
+
+    // Grab "Bad" states/errors/warnings
+    if (!response || response.err) {
+      this.handleError(response.err || {});
+      this.setState({isLoading: false});
+      return;
+    }
+
+    // TODO catch new people here
+
+    this.setState({isLoading: false});
   }
 
   handleSignup(event) {
@@ -206,7 +233,7 @@ class SignIn extends React.Component {
               )}
             </Pane>
 
-            <Button>Submit</Button>
+            <Button isLoading={this.state.isLoading}>Submit</Button>
           </Pane>
         </Pane>
       </form>

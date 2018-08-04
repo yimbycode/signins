@@ -65,6 +65,8 @@ class SignIn extends React.Component {
     };
 
     this.handleEmailTrack = this.handleEmailTrack.bind(this);
+    this.handleError = this.handleError.bind(this);
+    this.handleSignup = this.handleSignup.bind(this);
 
     this.handleEmail = buildHandler(this, "email");
     this.handleLastName = buildHandler(this, "lastName");
@@ -84,19 +86,21 @@ class SignIn extends React.Component {
 
   handleError(err) {
     if (err.errorCode === "DUPLICATE_VALUE") {
-      toaster.warning("You've already signed in! Go have fun!")
+      toaster.warning("You've already signed in! Go have fun!");
       console.warn(err);
       return;
-    } 
-    
-    toaster.danger("😭 Something went wrong! Check the developer tools for more info.")
-    console.error(err)
+    }
+
+    toaster.danger(
+      "😭 Something went wrong! Check the developer tools for more info."
+    );
+    console.error(err);
   }
 
   async handleEmailTrack(event) {
     event.preventDefault();
 
-    this.setState({isLoading: true});
+    this.setState({ isLoading: true });
 
     const response = await postJSON("/api/email", {
       email: this.state.email,
@@ -106,22 +110,39 @@ class SignIn extends React.Component {
     // Grab "Bad" states/errors/warnings
     if (!response || response.err) {
       this.handleError(response.err || {});
-      this.setState({isLoading: false});
+      this.setState({ isLoading: false });
       return;
     }
 
     // TODO catch new people here
+    if (response.message === "contact-does-not-exist") {
+      console.log("here")
+      toaster.notify("Hey we haven't seen you before!");
+      this.setState({ isLoading: false, isFullSignupForm: true });
+      return;
+    }
 
-    this.setState({isLoading: false});
+    this.setState({ isLoading: false });
   }
 
   handleSignup(event) {
     event.preventDefault();
 
-    postJSON("/api/email", {
+    this.setState({
+      isLoading: true
+    })
+
+    const response = postJSON("/api/email", {
       campaignId: this.campaignId,
       ...this.state // Just send it all #yolo
     });
+
+    console.log(response);
+
+    this.setState({
+      isFullSignupForm: false,
+      isLoading: false
+    })
   }
 
   render() {
@@ -146,7 +167,7 @@ class SignIn extends React.Component {
 
             {this.state.isFullSignupForm ? (
               <Paragraph marginBottom={majorScale(2)}>
-                👋 Woah we haven't seen you before!
+                👋 Let's sign you up as a YIMBY member!
               </Paragraph>
             ) : (
               <Paragraph marginBottom={majorScale(2)}>

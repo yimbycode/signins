@@ -115,7 +115,8 @@ async function handleEmailCheck(req, res) {
   try {
     // First check if this email exists already
     const prevContact = await existingContact(conn, email);
-    if (!prevContact) {
+    if (!prevContact || prevContact.length === 0) {
+      log("Could not find contact", email)
       return res.json({
         email,
         message: "contact-does-not-exist"

@@ -11,8 +11,8 @@ const handle = app.getRequestHandler();
 const conn = new jsforce.Connection();
 
 // Salesforce username and pass
-const user = process.argv[2];
-const pass = process.argv[3];
+const user = process.env.SALESFORCE_USER;
+const pass = process.env.SALESFORCE_PASS;
 
 if (!user) {
   console.error("No salesforce user entered");

@@ -1,15 +1,17 @@
 # 👋 YIMBY Signin generator
 
-This is the pro-housing, YIMBY signin generator for events.
-
-## Tech
-
-This project uses NextJS, a JS framework for building react and node apps.
+This is the pro-housing, YIMBY signin generator for events, built in [next.js](https://github.com/zeit/next.js/), and hosted on [now](https://zeit.co/now).
 
 ## Running
 
-At the moment, the salesforce username and pass are passed in as CMD line args, but they'll be environment variables in a bit.
+To run, you need a salesforce username and login to send the info for. Since all this website really does is send signup info to salesforce, it will fail immediately if the login details aren't provided.
 
 ```sh
-yarn dev <salesforce_username> <salesforce_password_and_secret_key>
+export SALESFORCE_USER=<salesforce_email>
+export SALESFORCE_PASS=<salesforce_pass><salesforce_secret_key> # You need both, it'll look like: pass + secret_key with no space.
+yarn dev
 ```
+
+## Deploying
+
+Deploying is easy. Merge your code into master and it'll get deployed automatically by [travis](https://travis-ci.org/yimbycode/signins) + now. Boom. Done. 
